@@ -2,6 +2,7 @@ from flask import Blueprint, g, request, Response, jsonify, stream_with_context
 from app.web.hooks import login_required, load_model
 from app.web.db.models import Pdf, Conversation
 from app.chat import build_chat, ChatArgs
+from app.chat.llms.chatopenai import build_classify_llm
 
 bp = Blueprint("conversation", __name__, url_prefix="/api/conversations")
 
@@ -42,7 +43,51 @@ def create_message(conversation):
         },
     )
 
-    chat = build_chat(chat_args)
+    classify_llm = build_classify_llm()
+    type_question = classify_llm.invoke(f"""
+        Classify the following question into 4 category:
+        - Overall summary return: overall
+        - Summary from page to page return: range,start,end
+        - Question return: question/request
+        - Generate quiz range: quiz,start,end
+
+        For example:
+        Summary this doc
+        overall
+
+        Summary page 1 to 10
+        range,1,10
+
+        What is Spring used for
+        question/request
+
+        Show me more about it
+        question/request
+
+        Generate quiz page 1 to 10
+        quiz,1,10
+
+        ===============
+
+        {input}
+    """).content.split(',')
+
+    chat = None
+    print(chat_args)
+
+
+    if type_question[0] == "question/request":
+        chat = build_chat(chat_args)
+
+    elif type_question[0] == "overall":
+        print("overall")
+        print(chat_args)
+
+    elif type_question[0] == "range":
+        print("range")
+
+    elif type_question[0] == "quiz":
+        print("quiz")
 
     if not chat:
         return "Chat not yet implemented!"
