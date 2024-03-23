@@ -1,6 +1,6 @@
 from langchain_core.messages import BaseMessage
 from pydantic import BaseModel
-from langchain.memory import ConversationBufferMemory
+from langchain.memory import ConversationBufferMemory, ConversationBufferWindowMemory
 from langchain.schema import BaseChatMessageHistory
 
 from app.web.api import (
@@ -31,4 +31,26 @@ def build_memory(chat_args):
         return_messages=True,
         memory_key="chat_history",
         output_key="answer"
+    )
+
+def build_memory(chat_args, k):
+    return ConversationBufferWindowMemory(
+        chat_memory=SqlMessageHistory(conversation_id=chat_args.conversation_id),
+        return_messages=True,
+        memory_key="chat_history",
+        output_key="answer",
+        k=k
+    )
+
+def build_summary_memory(chat_args):
+    return ConversationBufferMemory(
+        chat_memory=SqlMessageHistory(conversation_id=chat_args.conversation_id),
+        return_messages=True
+    )
+
+def build_summary_memory(chat_args, k):
+    return ConversationBufferWindowMemory(
+        chat_memory=SqlMessageHistory(conversation_id=chat_args.conversation_id),
+        return_messages=True,
+        k=k
     )

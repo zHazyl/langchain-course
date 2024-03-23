@@ -15,9 +15,7 @@ class RedundantFilterRetriever(BaseRetriever):
         return self.vectorstore.max_marginal_relevance_search_by_vector(
             embedding=emb,
             lambda_mult=0.8,
-            kwargs={
-                "search_kwargs": {"filter": {"pdf_id": chat_args.pdf_id}, "k": k}
-            }
+            k=6
         )
 
     async def aget_relevant_documents(self):

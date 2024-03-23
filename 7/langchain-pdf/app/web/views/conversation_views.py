@@ -1,7 +1,7 @@
 from flask import Blueprint, g, request, Response, jsonify, stream_with_context
 from app.web.hooks import login_required, load_model
 from app.web.db.models import Pdf, Conversation
-from app.chat import build_chat, ChatArgs
+from app.chat import build_chat, ChatArgs, build_summary
 from app.chat.llms.chatopenai import build_classify_llm
 
 bp = Blueprint("conversation", __name__, url_prefix="/api/conversations")
@@ -45,18 +45,18 @@ def create_message(conversation):
 
     classify_llm = build_classify_llm()
     type_question = classify_llm.invoke(f"""
-        Classify the following question into 4 category:
-        - Overall summary return: overall
-        - Summary from page to page return: range,start,end
-        - Question return: question/request
-        - Generate quiz range: quiz,start,end
+        Classify the following question into categories:
+        - Summary return: summary
+        - Question or request return: question/request
+        - Generate quiz: quiz
+        - Else: question/request
 
         For example:
-        Summary this doc
-        overall
+        Summarize this doc
+        summary
 
-        Summary page 1 to 10
-        range,1,10
+        please help me summarize history
+        summary
 
         What is Spring used for
         question/request
@@ -64,33 +64,34 @@ def create_message(conversation):
         Show me more about it
         question/request
 
-        Generate quiz page 1 to 10
-        quiz,1,10
+        Generate quiz
+        quiz
+                                        
+        As table format
+        question/request
 
         ===============
 
         {input}
-    """).content.split(',')
+    """).content
 
     chat = None
-    print(chat_args)
 
+    print(type_question)
 
-    if type_question[0] == "question/request":
+    if type_question == "question/request":
         chat = build_chat(chat_args)
 
-    elif type_question[0] == "overall":
-        print("overall")
-        print(chat_args)
+    elif type_question == "summary":
+        print("type_summary")
+        print(input)
+        chat = build_summary(chat_args)
 
-    elif type_question[0] == "range":
-        print("range")
-
-    elif type_question[0] == "quiz":
+    elif type_question == "quiz":
         print("quiz")
 
     if not chat:
-        return "Chat not yet implemented!"
+        return type_question.__str__()
 
     if streaming:
         return Response(

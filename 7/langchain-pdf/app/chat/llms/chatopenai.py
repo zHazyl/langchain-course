@@ -8,3 +8,6 @@ def build_condense_question_llm():
 
 def build_classify_llm():
     return ChatOpenAI()
+
+def build_summary_llm():
+    return ChatOpenAI(streaming=False, max_tokens=300)
