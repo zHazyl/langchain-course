@@ -4,6 +4,7 @@ from invoke import task
 
 @task
 def dev(ctx):
+    # ctx.run("flask --app app.web init-db")
     ctx.run(
         "flask --app app.web run --debug --port 8000",
         pty=os.name != "nt",

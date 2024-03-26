@@ -1,5 +1,5 @@
 from functools import partial
-from .pinecone import build_retriever
+from .pinecone import build_retriever, vector_store
 
 retriever_map = {
     "pinecone_2": partial(build_retriever, k=1),
