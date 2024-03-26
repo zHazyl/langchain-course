@@ -1,5 +1,5 @@
 from app.chat.models import ChatArgs
-from app.chat.vector_stores.pinecone import build_retriever, build_summary_retriever
+from app.chat.vector_stores.pinecone import build_retriever, build_summary_retriever, build_manual_retriever
 from app.chat.llms.chatopenai import build_llm , build_condense_question_llm, build_summary_llm
 from app.chat.llms import gemini
 from app.chat.memories.sql_memory import build_memory, build_summary_memory
@@ -19,7 +19,7 @@ def build_chat(chat_args: ChatArgs):
 
         chain = build_chat(chat_args)
     """
-    retriever = build_retriever(chat_args)
+    retriever = build_manual_retriever()
     llm = build_llm(chat_args)
     condense_question_llm = gemini.build_condense_question_llm()
     # condense_question_llm = build_condense_question_llm()

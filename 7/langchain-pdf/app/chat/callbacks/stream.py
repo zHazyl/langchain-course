@@ -16,7 +16,6 @@ class StreamingHandler(BaseCallbackHandler):
             self.streaming_run_ids.add(run_id)
             self.human_message[run_id] = messages[-1][1].content
 
-
     def on_llm_new_token(self, token, **kwargs):
         self.queue.put(token)
     
